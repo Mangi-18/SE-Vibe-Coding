@@ -1,17 +1,37 @@
 class Board:
     def __init__(self, rows=2, cols=2):
+        if not isinstance(rows, int) or not isinstance(cols, int) or rows < 1 or cols < 1:
+            raise ValueError("rows and cols must be positive integers")
+
         self.rows = rows
         self.cols = cols
         self.horizontal = [[False] * cols for _ in range(rows + 1)]
         self.vertical = [[False] * (cols + 1) for _ in range(rows)]
         self.completed = set()
+        self.owners = {}
 
     def add_line(self, orientation, row, col):
+        if not self._line_is_available(orientation, row, col):
+            raise ValueError("invalid or already-used line")
+
         if orientation == "H":
             self.horizontal[row][col] = True
         else:
             self.vertical[row][col] = True
         self._update_completed()
+
+    def claim_boxes(self, player):
+        new_boxes = [box for box in self.completed if box not in self.owners]
+        for box in new_boxes:
+            self.owners[box] = player
+        return len(new_boxes)
+
+    def _line_is_available(self, orientation, row, col):
+        if orientation == "H":
+            return 0 <= row <= self.rows and 0 <= col < self.cols and not self.horizontal[row][col]
+        if orientation == "V":
+            return 0 <= row < self.rows and 0 <= col <= self.cols and not self.vertical[row][col]
+        return False
 
     def _update_completed(self):
         for r in range(self.rows):
@@ -41,6 +61,7 @@ class Board:
                     wall = "|" if self.vertical[r][c] else " "
                     middle.append(wall)
                     if c < self.cols:
-                        middle.append(" " + ("X" if (r, c) in self.completed else " ") + " ")
+                        owner = self.owners.get((r, c))
+                        middle.append(" " + (owner if owner else " ") + " ")
                 print("".join(middle))
         print()

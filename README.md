@@ -28,11 +28,24 @@ V row column
 
 Rows and columns start at zero.
 
+The board defaults to 2 x 2 boxes. Player names and board size can be customized:
+
+```text
+python main.py --rows 3 --cols 4 --player1 Alice --player2 Bob
+```
+
+Completed boxes are marked with the owning player's number. A player who completes
+a box keeps the turn; otherwise the turn passes to the other player.
+
 ## Task 1 — Reproduce and investigate the bug
 
 Run several games and deliberately create situations where a move completes one or more boxes.
 
 Compare the score and turn behaviour before and after box completion. Identify the incorrect behaviour, trace it through the board and game-state logic, and fix it without replacing the modular structure.
+
+The fix centralizes move application in `DotsAndBoxes.play_move`: the board is
+updated once, newly completed boxes are calculated from the before/after state,
+the current player receives those points, and only a non-scoring move changes turn.
 
 Your before-change video should capture the broken behaviour clearly.
 
@@ -51,6 +64,12 @@ The program should safely handle malformed commands, invalid coordinates, repeat
 ## Task 4 — Testing and quality
 
 Create or expand automated tests covering the important game rules.
+
+Run the tests from this folder with:
+
+```text
+python -m unittest discover -v
+```
 
 Include tests for at least:
 - a valid horizontal move
